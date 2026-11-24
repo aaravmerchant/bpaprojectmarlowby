@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>marlowby — Explore Your City, One Box at a Time</title>
+
+  <!-- Google Fonts: Newsreader (Editorial Headings) & Inter (Clean UI/Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Newsreader"', 'Georgia', 'serif'],
+            sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            cream: '#FAF8F5',
+            sand: '#F2EDE4',
+            borderWarm: '#E6E2DA',
+            ink: '#18181B',
+            muted: '#52525B',
+            accent: '#D44D1A',
+            accentHover: '#B93E12',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Base Editorial Styling */
+    html, body {
+      background-color: #FAF8F5;
+      color: #18181B;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+
+    /* Strict Multi-Page View Visibility */
+    .page-view {
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+      animation: pageFadeIn 0.25s ease-out;
+    }
+
+    @keyframes pageFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Warm Fallback Gradient for Photography */
+    .photo-box {
+      background: linear-gradient(135deg, #EAE3D7 0%, #D9CFC0 100%);
+    }
+
+    /* Accessible Focus Outlines */
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid #D44D1A;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen bg-cream text-ink selection:bg-accent selection:text-white">
+
+  <!-- =========================================================
+       STICKY TOP NAVIGATION BAR
+  ========================================================= -->
+  <header class="sticky top-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-borderWarm">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 h-20 flex items-center justify-between gap-4">
+
+      <!-- Left: Custom Geometric Isometric Box 'M' Logo -->
+      <button type="button" data-nav="home" class="flex items-center gap-2.5 group text-left" aria-label="marlowby Home">
+        <svg class="w-8 h-8 shrink-0 transition-transform duration-200 group-hover:scale-105" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Outer Isometric Box -->
+          <path d="M20 3.5L35 12V28L20 36.5L5 28V12L20 3.5Z" fill="#FFF7F4" stroke="#D44D1A" stroke-width="2.4" stroke-linejoin="round" />
+          <!-- Inner Stylized M Fold -->
+          <path d="M11 26.5V14.5L20 20.5L29 14.5V26.5" stroke="#D44D1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- Subtle Center Seam -->
+          <path d="M20 20.5V31" stroke="#D44D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.45" />
+        </svg>
+        <span class="font-sans font-bold text-xl tracking-tight text-ink">marlowby</span>
+      </button>
+
+      <!-- Center: Desktop Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1" aria-label="Main Navigation">
+        <button type="button" data-nav="home" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-colors">Home</button>
+        <button type="button" data-nav="cities" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-colors">City Boxes</button>
+        <button type="button" data-nav="makers" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-colors">Local Makers</button>
+        <button type="button" data-nav="plans" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-colors">Plans</button>
+        <button type="button" data-nav="who-are-we" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-colors">Who Are We</button>
+      </nav>
+
+      <!-- Right: Solid Burnt-Orange CTA + Mobile Menu Toggle -->
+      <div class="flex items-center gap-3">
+        <button type="button" data-nav="subscribe" class="nav-cta hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors shadow-sm">
+          Subscribe
+        </button>
+
+        <button id="mobileMenuBtn" type="button" class="md:hidden p-2.5 rounded-xl border border-borderWarm bg-white text-ink hover:bg-sand transition-colors" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg id="menuIconOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menuIconClose" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileDrawer" class="hidden md:hidden border-t border-borderWarm bg-cream px-5 py-4">
+      <nav class="flex flex-col gap-1.5" aria-label="Mobile Navigation">
+        <button type="button" data-nav="home" class="mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors">Home</button>
+        <button type="button" data-nav="cities" class="mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors">City Boxes</button>
+        <button type="button" data-nav="makers" class="mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors">Local Makers</button>
+        <button type="button" data-nav="plans" class="mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors">Plans</button>
+        <button type="button" data-nav="who-are-we" class="mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors">Who Are We</button>
+        <button type="button" data-nav="subscribe" class="mt-2 w-full text-center px-4 py-3 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors">
+          Subscribe
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MAIN MULTI-PAGE CONTENT CONTAINER
+  ========================================================= -->
+  <main class="flex-1">
+
+    <!-- =======================================================
+         PAGE 1: HOME (#page-home) — CLEAN PREVIEW PAGE
+    ======================================================= -->
+    <section id="page-home" class="page-view active" aria-label="Home Page">
+
+      <!-- Editorial Hero -->
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 pt-12 pb-16 lg:pt-20 lg:pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div class="lg:col-span-6">
+            <p class="inline-block px-3.5 py-1.5 rounded-full bg-sand border border-borderWarm text-xs font-semibold text-ink mb-6">
+              Monthly U.S. Local Goods Subscription
+            </p>
+            <h1 class="text-4xl sm:text-5xl lg:text-[3.75rem] font-medium tracking-tight text-ink leading-[1.08] mb-6">
+              A different U.S. city, delivered every month.
+            </h1>
+            <p class="text-base sm:text-lg text-muted leading-relaxed max-w-xl mb-8">
+              Marlowby teams up with neighborhood coffee roasters, ceramic studios, and family kitchens across America. Every month, we pack five full-size local goods and a printed city guide into one box shipped straight to your door.
+            </p>
+            <div class="flex flex-wrap items-center gap-3.5">
+              <button type="button" data-nav="plans" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors shadow-sm">
+                See Subscription Plans
+              </button>
+              <button type="button" data-nav="cities" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-ink bg-white border border-borderWarm hover:bg-sand transition-colors">
+                Browse City Boxes
+              </button>
+            </div>
+            <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-muted">
+              <span>5–6 full-size local items</span>
+              <span>&bull;</span>
+              <span>Free U.S. shipping</span>
+              <span>&bull;</span>
+              <span>Skip or cancel anytime</span>
+            </div>
+          </div>
+
+          <!-- 3-Photo Asymmetric Editorial Collage -->
+          <div class="lg:col-span-6 grid grid-cols-12 gap-4">
+            <div class="col-span-7 photo-box rounded-2xl overflow-hidden border border-borderWarm h-80 sm:h-96">
+              <img
+                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80"
+                alt="Freshly brewed small-batch local coffee"
+                class="w-full h-full object-cover"
+                onerror="this.style.display='none'"
+              />
+            </div>
+            <div class="col-span-5 flex flex-col gap-4">
+              <div class="photo-box rounded-2xl overflow-hidden border border-borderWarm h-36 sm:h-44">
+                <img
+                  src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=700&q=80"
+                  alt="Handmade ceramic mugs from a local pottery studio"
+                  class="w-full h-full object-cover"
+                  onerror="this.style.display='none'"
+                />
+              </div>
+              <div class="photo-box rounded-2xl overflow-hidden border border-borderWarm h-40 sm:h-48">
+                <img
+                  src="https://images.unsplash.com/photo-1531218150217-54595bc2b934?auto=format&fit=crop&w=700&q=80"
+                  alt="Austin Texas city skyline at dusk"
+                  class="w-full h-full object-cover"
+                  onerror="this.style.display='none'"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Step "How It Works" Strip -->
+      <div class="bg-sand border-y border-borderWarm">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+          <div class="max-w-xl mb-10">
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">How It Works</p>
+            <h2 class="text-3xl sm:text-4xl font-medium text-ink mt-2">Real neighborhood goods, zero guesswork.</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl border border-borderWarm p-7">
+              <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-sand text-ink font-semibold text-sm mb-5">1</span>
+              <h3 class="text-lg font-semibold text-ink mb-2">We partner with local shops</h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Each month we pick one U.S. city and buy directly from independent roasters, bakers, and makers at fair wholesale rates.
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-7">
+              <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-sand text-ink font-semibold text-sm mb-5">2</span>
+              <h3 class="text-lg font-semibold text-ink mb-2">Your box ships on the 15th</h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Every parcel is packed in recyclable kraft materials and ships free via tracked priority mail to all 50 states.
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-7">
+              <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-sand text-ink font-semibold text-sm mb-5">3</span>
+              <h3 class="text-lg font-semibold text-ink mb-2">Taste &amp; explore from home</h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Unbox five full-size items alongside a printed neighborhood guide with local recommendations and maker stories.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured City Boxes Preview Row (3 Cards) -->
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-18 py-16 lg:py-20">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">Featured City Boxes</p>
+            <h2 class="text-3xl sm:text-4xl font-medium text-ink mt-2">See what's been in recent boxes</h2>
+          </div>
+          <button type="button" data-nav="cities" class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accentHover transition-colors">
+            View All 6 Cities &rarr;
+          </button>
+        </div>
+
+        <div id="homeFeaturedCities" class="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Meet the Local Makers Preview Strip -->
+      <div class="bg-sand border-y border-borderWarm">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-20">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-accent">Meet the Local Makers</p>
+              <h2 class="text-3xl sm:text-4xl font-medium text-ink mt-2">Small businesses behind the goods</h2>
+            </div>
+            <button type="button" data-nav="makers" class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accentHover transition-colors">
+              Explore All Makers &rarr;
+            </button>
+          </div>
+
+          <div id="homeFeaturedMakers" class="grid grid-cols-1 md:grid-cols-3 gap-7">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Simple Pricing Preview Banner -->
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 pt-16 lg:pt-20">
+        <div class="bg-ink text-white rounded-3xl p-8 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#F59E7A]">Simple Pricing</p>
+            <h2 class="text-3xl sm:text-4xl font-medium text-white mt-2">Starting at $39/box</h2>
+            <p class="text-sm sm:text-base text-zinc-300 mt-3">
+              Free U.S. Shipping &bull; $75+ retail value inside every box &bull; Cancel Anytime
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3.5 shrink-0">
+            <button type="button" data-nav="plans" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-ink bg-white hover:bg-sand transition-colors">
+              Compare Plans
+            </button>
+            <button type="button" data-nav="subscribe" class="px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors">
+              Subscribe Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Who Are We Preview Teaser -->
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-20">
+        <div class="bg-white rounded-3xl border border-borderWarm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+          <div class="lg:col-span-5 photo-box min-h-[260px]">
+            <img
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=80"
+              alt="Local shop owner preparing small-batch orders"
+              class="w-full h-full object-cover"
+              onerror="this.style.display='none'"
+            />
+          </div>
+          <div class="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">Who Are We</p>
+            <h2 class="text-3xl sm:text-4xl font-medium text-ink mt-2 mb-4">
+              Built to keep Main Street businesses thriving.
+            </h2>
+            <p class="text-sm sm:text-base text-muted leading-relaxed mb-7">
+              We started Marlowby because the best part of visiting a new city is ducking into a neighborhood roaster, bakery, or studio you'd never find in an airport gift shop. Every box pays small American businesses upfront and shares their story nationwide.
+            </p>
+            <div>
+              <button type="button" data-nav="who-are-we" class="px-6 py-3 rounded-xl text-sm font-semibold text-ink bg-sand hover:bg-[#E7DFD3] border border-borderWarm transition-colors">
+                Read Our Story &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 2: CITY BOXES (#page-cities) — FULL DEDICATED PAGE
+    ======================================================= -->
+    <section id="page-cities" class="page-view" aria-label="City Boxes Page">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+
+        <!-- Page Header + Search -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">Featured Editions</p>
+            <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2">U.S. City Boxes</h1>
+            <p class="text-base text-muted mt-2 max-w-2xl">
+              Browse six recent city editions below. Select any city to inspect all five full-size items inside and start your subscription with that box.
+            </p>
+          </div>
+
+          <div class="w-full lg:w-80 relative">
+            <label for="citySearchInput" class="sr-only">Search cities or products</label>
+            <input
+              id="citySearchInput"
+              type="text"
+              placeholder="Search city, maker, or item..."
+              class="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-borderWarm text-sm text-ink placeholder-zinc-400"
+            />
+            <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Region Filter Pills -->
+        <div id="cityRegionFilters" class="flex flex-wrap gap-2 mb-10" role="group" aria-label="Filter cities by region">
+          <button type="button" data-region="All Cities" class="region-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">All Cities</button>
+          <button type="button" data-region="South" class="region-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">South</button>
+          <button type="button" data-region="West" class="region-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">West</button>
+          <button type="button" data-region="Midwest" class="region-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Midwest</button>
+          <button type="button" data-region="Pacific Northwest" class="region-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Pacific Northwest</button>
+        </div>
+
+        <!-- 6-City Selector Grid -->
+        <div id="citiesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Empty Search State -->
+        <div id="citiesEmptyState" class="hidden bg-white rounded-2xl border border-borderWarm p-10 text-center mb-12">
+          <p class="font-semibold text-ink">No city boxes matched that search.</p>
+          <p class="text-sm text-muted mt-1">Try another keyword or reset the region filter to All Cities.</p>
+        </div>
+
+        <!-- Rich "Inside the Box" Showcase Panel -->
+        <div id="cityDetailPanel" class="bg-white rounded-3xl border border-borderWarm overflow-hidden shadow-sm">
+          <!-- Rendered by JS based on selected city -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 3: LOCAL MAKERS (#page-makers) — FULL DEDICATED PAGE
+    ======================================================= -->
+    <section id="page-makers" class="page-view" aria-label="Local Makers Page">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+
+        <!-- Page Header -->
+        <div class="max-w-2xl mb-8">
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent">Small Business Partners</p>
+          <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2">Local Makers</h1>
+          <p class="text-base text-muted mt-3 leading-relaxed">
+            100% of the products in Marlowby boxes come from independent, small-batch U.S. businesses. No national chains, no private-label filler—just real neighborhood shops we pay fairly upfront.
+          </p>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div id="makerCategoryFilters" class="flex flex-wrap gap-2 mb-10" role="group" aria-label="Filter local makers by category">
+          <button type="button" data-maker-cat="All" class="maker-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">All</button>
+          <button type="button" data-maker-cat="Coffee & Pantry" class="maker-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Coffee &amp; Pantry</button>
+          <button type="button" data-maker-cat="Home & Goods" class="maker-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Home &amp; Goods</button>
+          <button type="button" data-maker-cat="Sweets & Snacks" class="maker-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Sweets &amp; Snacks</button>
+          <button type="button" data-maker-cat="Self-Care" class="maker-pill px-4 py-2 rounded-xl text-xs font-semibold transition-colors">Self-Care</button>
+        </div>
+
+        <!-- 8 Makers Grid -->
+        <div id="makersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Nominate a Local Business Interactive Form -->
+        <div class="bg-sand rounded-3xl border border-borderWarm p-8 sm:p-12">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-accent">Community Tips</p>
+              <h2 class="text-3xl font-medium text-ink mt-2">Nominate a local business</h2>
+              <p class="text-sm text-muted mt-3 leading-relaxed">
+                Know a hometown roaster, bakery, ceramicist, or soap maker we should feature in a future city box? Tell us about them and our sourcing team will reach out.
+              </p>
+            </div>
+
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-borderWarm p-6 sm:p-8">
+              <form id="nominateForm" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="nomShop" class="block text-xs font-semibold text-ink mb-1.5">Business Name</label>
+                    <input id="nomShop" type="text" required placeholder="e.g. Oak Street Roasters" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                  </div>
+                  <div>
+                    <label for="nomCity" class="block text-xs font-semibold text-ink mb-1.5">City &amp; State</label>
+                    <input id="nomCity" type="text" required placeholder="e.g. Denver, CO" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                  </div>
+                </div>
+                <div>
+                  <label for="nomProduct" class="block text-xs font-semibold text-ink mb-1.5">What do they make?</label>
+                  <textarea id="nomProduct" rows="3" required placeholder="Tell us your favorite item from their shop..." class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink"></textarea>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
+                  <button type="submit" class="px-6 py-3 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors">
+                    Submit Nomination
+                  </button>
+                  <p id="nomFeedback" class="hidden text-sm font-medium text-emerald-700"></p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 4: PLANS (#page-plans) — FULL DEDICATED PAGE
+    ======================================================= -->
+    <section id="page-plans" class="page-view" aria-label="Subscription Plans Page">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+
+        <!-- Header + For Myself / Give as a Gift Toggle -->
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent">Subscription Options</p>
+          <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2">Pick a plan that fits</h1>
+          <p class="text-base text-muted mt-3">
+            Every plan includes 5–6 full-size local products, a printed neighborhood guide, and free shipping anywhere in the U.S.
+          </p>
+
+          <div class="mt-7 inline-flex items-center p-1.5 rounded-2xl bg-sand border border-borderWarm" role="group" aria-label="Order Mode">
+            <button id="plansModeSelf" type="button" class="px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors">
+              For Myself
+            </button>
+            <button id="plansModeGift" type="button" class="px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors">
+              Give as a Gift
+            </button>
+          </div>
+          <p id="plansGiftNote" class="hidden text-xs font-medium text-accent mt-3">
+            Gift plans do not auto-renew and include a handwritten note card in the first box.
+          </p>
+        </div>
+
+        <!-- 4 Realistic Subscription Plan Cards -->
+        <div id="plansGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- What's Inside Every Single Box (4-Item Visual Breakdown) -->
+        <div class="bg-sand rounded-3xl border border-borderWarm p-8 sm:p-12 mb-16">
+          <div class="mb-8">
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">Guaranteed Value</p>
+            <h2 class="text-3xl font-medium text-ink mt-1">What's inside every single box</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-10 h-10 rounded-xl bg-sand flex items-center justify-center text-accent font-bold text-sm mb-4">01</div>
+              <h3 class="text-base font-semibold text-ink mb-1.5">5–6 Full-Size Goods</h3>
+              <p class="text-sm text-muted leading-relaxed">Coffee, pantry staples, sweets, ceramics, or candles—never sample packets.</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-10 h-10 rounded-xl bg-sand flex items-center justify-center text-accent font-bold text-sm mb-4">02</div>
+              <h3 class="text-base font-semibold text-ink mb-1.5">Printed City Guide</h3>
+              <p class="text-sm text-muted leading-relaxed">A 16-page pocket booklet highlighting local spots, parks, and recipes from that city.</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-10 h-10 rounded-xl bg-sand flex items-center justify-center text-accent font-bold text-sm mb-4">03</div>
+              <h3 class="text-base font-semibold text-ink mb-1.5">Maker Story Cards</h3>
+              <p class="text-sm text-muted leading-relaxed">Meet the owners behind every item, plus direct links to reorder your favorites.</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-10 h-10 rounded-xl bg-sand flex items-center justify-center text-accent font-bold text-sm mb-4">04</div>
+              <h3 class="text-base font-semibold text-ink mb-1.5">Carbon-Neutral Shipping</h3>
+              <p class="text-sm text-muted leading-relaxed">Free tracked U.S. shipping packed in 100% recyclable, plastic-free materials.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Plan Comparison Table -->
+        <div class="bg-white rounded-3xl border border-borderWarm p-6 sm:p-10 mb-16">
+          <h2 class="text-2xl sm:text-3xl font-medium text-ink mb-6">Compare Plans Side by Side</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-borderWarm text-xs uppercase tracking-wider text-muted">
+                  <th class="py-3.5 pr-4">Feature</th>
+                  <th class="py-3.5 px-4">Monthly</th>
+                  <th class="py-3.5 px-4">3-Month</th>
+                  <th class="py-3.5 px-4 text-accent">6-Month</th>
+                  <th class="py-3.5 pl-4">12-Month</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-borderWarm text-ink">
+                <tr>
+                  <td class="py-4 pr-4 font-medium">Price per box</td>
+                  <td class="py-4 px-4">$49</td>
+                  <td class="py-4 px-4">$45</td>
+                  <td class="py-4 px-4 font-semibold text-accent">$42</td>
+                  <td class="py-4 pl-4 font-semibold">$39</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-medium">Savings vs. Monthly</td>
+                  <td class="py-4 px-4 text-muted">—</td>
+                  <td class="py-4 px-4">Save 8%</td>
+                  <td class="py-4 px-4 font-medium">Save 14%</td>
+                  <td class="py-4 pl-4 font-medium">Save 20%</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-medium">Choose your starting city</td>
+                  <td class="py-4 px-4">Yes</td>
+                  <td class="py-4 px-4">Yes</td>
+                  <td class="py-4 px-4">Yes</td>
+                  <td class="py-4 pl-4">Yes</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-medium">Free U.S. shipping</td>
+                  <td class="py-4 px-4">Included</td>
+                  <td class="py-4 px-4">Included</td>
+                  <td class="py-4 px-4">Included</td>
+                  <td class="py-4 pl-4">Included</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-medium">Skip a month or pause</td>
+                  <td class="py-4 px-4">Anytime</td>
+                  <td class="py-4 px-4">Anytime</td>
+                  <td class="py-4 px-4">Anytime</td>
+                  <td class="py-4 pl-4">Anytime</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Interactive FAQ Accordion -->
+        <div class="max-w-3xl mx-auto">
+          <h2 class="text-3xl font-medium text-ink text-center mb-8">Frequently Asked Questions</h2>
+          <div id="faqAccordion" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 5: WHO ARE WE (#page-who-are-we) — FULL DEDICATED PAGE
+    ======================================================= -->
+    <section id="page-who-are-we" class="page-view" aria-label="Who Are We Page">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+
+        <!-- Editorial Header -->
+        <div class="max-w-3xl mb-14">
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent">Who Are We</p>
+          <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2 leading-tight">
+            Keeping local Main Street businesses thriving across America.
+          </h1>
+          <p class="text-base sm:text-lg text-muted mt-4 leading-relaxed">
+            Marlowby was built on a simple idea: every American city has neighborhoods full of independent makers worth knowing—not just the big tourist landmarks.
+          </p>
+        </div>
+
+        <!-- Our Story 2-Column Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+          <div class="lg:col-span-6 photo-box rounded-3xl overflow-hidden border border-borderWarm h-80 sm:h-[420px]">
+            <img
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1000&q=80"
+              alt="Small business shopkeeper packing local orders"
+              class="w-full h-full object-cover"
+              onerror="this.style.display='none'"
+            />
+          </div>
+          <div class="lg:col-span-6 space-y-4">
+            <h2 class="text-3xl font-medium text-ink">How Marlowby started</h2>
+            <p class="text-base text-muted leading-relaxed">
+              Whenever we traveled to a new U.S. city, we loved bringing home a bag of locally roasted coffee, a jar of regional honey, or a mug from a neighborhood pottery studio. Back home, though, those shops were hard to discover online unless you already knew their name.
+            </p>
+            <p class="text-base text-muted leading-relaxed">
+              We launched Marlowby to connect curious households directly with small American businesses. Instead of generic souvenirs or mass-produced box fillers, we visit cities, taste-test local favorites, and introduce five real makers to subscribers every single month.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3 Core Pillars -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div class="bg-white rounded-2xl border border-borderWarm p-7">
+            <h3 class="text-lg font-semibold text-ink mb-2">Fair Wholesale Pricing</h3>
+            <p class="text-sm text-muted leading-relaxed">
+              We pay every local maker upfront at fair wholesale rates—never consignment, and never asking small shops to donate products "for exposure."
+            </p>
+          </div>
+          <div class="bg-white rounded-2xl border border-borderWarm p-7">
+            <h3 class="text-lg font-semibold text-ink mb-2">Small-Batch Only</h3>
+            <p class="text-sm text-muted leading-relaxed">
+              We focus on independent businesses with fewer than 20 employees—family kitchens, neighborhood roasters, and working studio artists.
+            </p>
+          </div>
+          <div class="bg-white rounded-2xl border border-borderWarm p-7">
+            <h3 class="text-lg font-semibold text-ink mb-2">Cultural Storytelling</h3>
+            <p class="text-sm text-muted leading-relaxed">
+              Every box comes with a printed neighborhood guide written with local residents so you learn the history behind each product.
+            </p>
+          </div>
+        </div>
+
+        <!-- Community Impact Numbers Bar -->
+        <div class="bg-ink text-white rounded-3xl p-8 sm:p-12 mb-16">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#F59E7A] mb-6">Community Impact</p>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <p class="font-editorial text-4xl sm:text-5xl font-medium text-white">140+</p>
+              <p class="text-sm text-zinc-300 mt-1.5">Small Businesses Partnered</p>
+            </div>
+            <div>
+              <p class="font-editorial text-4xl sm:text-5xl font-medium text-white">28</p>
+              <p class="text-sm text-zinc-300 mt-1.5">U.S. Cities Featured</p>
+            </div>
+            <div>
+              <p class="font-editorial text-4xl sm:text-5xl font-medium text-white">100%</p>
+              <p class="text-sm text-zinc-300 mt-1.5">Plastic-Free Packaging</p>
+            </div>
+            <div>
+              <p class="font-editorial text-4xl sm:text-5xl font-medium text-white">$420k+</p>
+              <p class="text-sm text-zinc-300 mt-1.5">Paid Directly to Local Makers</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meet the Founding Team / BPA Team Roles -->
+        <div class="mb-16">
+          <div class="mb-8">
+            <p class="text-xs font-semibold uppercase tracking-wider text-accent">The Team</p>
+            <h2 class="text-3xl font-medium text-ink mt-1">Meet the People Behind Marlowby</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-11 h-11 rounded-full bg-sand text-ink font-semibold text-sm flex items-center justify-center mb-4">LD</div>
+              <p class="text-xs font-semibold text-accent uppercase tracking-wider">Lead Designer</p>
+              <h3 class="text-base font-semibold text-ink mt-1">Brand &amp; UI Architecture</h3>
+              <p class="text-sm text-muted mt-2 leading-relaxed">
+                Designed the custom isometric Marlowby logo, editorial typography system, and accessible color palette.
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-11 h-11 rounded-full bg-sand text-ink font-semibold text-sm flex items-center justify-center mb-4">MO</div>
+              <p class="text-xs font-semibold text-accent uppercase tracking-wider">Merchandising &amp; Outreach</p>
+              <h3 class="text-base font-semibold text-ink mt-1">City &amp; Maker Curation</h3>
+              <p class="text-sm text-muted mt-2 leading-relaxed">
+                Researched regional specialties, small-business partners, and neighborhood guides across all six featured cities.
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-11 h-11 rounded-full bg-sand text-ink font-semibold text-sm flex items-center justify-center mb-4">FE</div>
+              <p class="text-xs font-semibold text-accent uppercase tracking-wider">Front-End Developer</p>
+              <h3 class="text-base font-semibold text-ink mt-1">Interactive Engineering</h3>
+              <p class="text-sm text-muted mt-2 leading-relaxed">
+                Built the multi-page navigation engine, live city/maker filtering, and synced subscription checkout summary.
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl border border-borderWarm p-6">
+              <div class="w-11 h-11 rounded-full bg-sand text-ink font-semibold text-sm flex items-center justify-center mb-4">OC</div>
+              <p class="text-xs font-semibold text-accent uppercase tracking-wider">Operations &amp; Content</p>
+              <p class="text-base font-semibold text-ink mt-1">Copy, QA &amp; Compliance</p>
+              <p class="text-sm text-muted mt-2 leading-relaxed">
+                Managed plain-English copywriting, cross-browser QA, WCAG contrast checks, Works Cited, and AI documentation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom CTA Banner -->
+        <div class="bg-sand rounded-3xl border border-borderWarm p-8 sm:p-12 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-medium text-ink">Ready for your first U.S. city box?</h2>
+            <p class="text-sm sm:text-base text-muted mt-1">Pick your starting city and join thousands of subscribers supporting local shops.</p>
+          </div>
+          <button type="button" data-nav="subscribe" class="px-7 py-3.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors shrink-0">
+            Start Your Subscription
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 6: SUBSCRIBE (#page-subscribe) — DEDICATED CHECKOUT
+    ======================================================= -->
+    <section id="page-subscribe" class="page-view" aria-label="Subscribe Page">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+        <div class="mb-10">
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent">Checkout</p>
+          <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2">Start Your Marlowby Box</h1>
+          <p class="text-base text-muted mt-2">Choose your plan, pick your first U.S. city, and tell us where to ship.</p>
+        </div>
+
+        <!-- Interactive Checkout Container -->
+        <div id="checkoutContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+          <!-- Left Column: Interactive Form -->
+          <form id="subscribeForm" class="lg:col-span-7 bg-white rounded-3xl border border-borderWarm p-6 sm:p-9 space-y-7">
+
+            <!-- Step 1: Select Plan -->
+            <div>
+              <label class="block text-sm font-semibold text-ink mb-3">1. Choose your plan</label>
+              <div id="checkoutPlanSelector" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Step 2: Gift Mode Toggle -->
+            <div class="p-4 rounded-2xl bg-sand border border-borderWarm">
+              <label class="flex items-center justify-between gap-4 cursor-pointer">
+                <div>
+                  <span class="block text-sm font-semibold text-ink">Send as a gift</span>
+                  <span class="block text-xs text-muted">One-time payment (no auto-renewal) with a handwritten note card.</span>
+                </div>
+                <input id="checkoutGiftToggle" type="checkbox" class="w-5 h-5 accent-[#D44D1A] rounded cursor-pointer" />
+              </label>
+
+              <div id="checkoutGiftFields" class="hidden mt-4 pt-4 border-t border-borderWarm space-y-3">
+                <div>
+                  <label for="giftRecipient" class="block text-xs font-semibold text-ink mb-1">Recipient's Name</label>
+                  <input id="giftRecipient" type="text" placeholder="Alex Rivera" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-borderWarm text-sm text-ink" />
+                </div>
+                <div>
+                  <label for="giftNote" class="block text-xs font-semibold text-ink mb-1">Gift Note (Optional)</label>
+                  <textarea id="giftNote" rows="2" placeholder="Hope you enjoy exploring a new city each month!" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-borderWarm text-sm text-ink"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Starting City & Dietary Preference -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="checkoutCitySelect" class="block text-sm font-semibold text-ink mb-2">2. Starting city box</label>
+                <select id="checkoutCitySelect" class="w-full px-3.5 py-3 rounded-xl bg-white border border-borderWarm text-sm text-ink">
+                  <!-- Rendered by JS -->
+                </select>
+              </div>
+              <div>
+                <label for="checkoutDietary" class="block text-sm font-semibold text-ink mb-2">3. Dietary note (optional)</label>
+                <select id="checkoutDietary" class="w-full px-3.5 py-3 rounded-xl bg-white border border-borderWarm text-sm text-ink">
+                  <option value="Standard">Standard (No restrictions)</option>
+                  <option value="Vegetarian">Vegetarian</option>
+                  <option value="Nut-Free">Nut-Free</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Step 4: Shipping Details -->
+            <div class="space-y-4 pt-2 border-t border-borderWarm">
+              <h2 class="font-sans text-sm font-semibold text-ink">4. Your shipping details</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="subName" class="block text-xs font-semibold text-ink mb-1.5">Full Name</label>
+                  <input id="subName" type="text" required placeholder="Jordan Taylor" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                </div>
+                <div>
+                  <label for="subEmail" class="block text-xs font-semibold text-ink mb-1.5">Email Address</label>
+                  <input id="subEmail" type="email" required placeholder="jordan@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                </div>
+              </div>
+              <div>
+                <label for="subAddress" class="block text-xs font-semibold text-ink mb-1.5">Street Address</label>
+                <input id="subAddress" type="text" required placeholder="742 Evergreen Ave, Apt 4B" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="col-span-2 sm:col-span-1">
+                  <label for="subCity" class="block text-xs font-semibold text-ink mb-1.5">City</label>
+                  <input id="subCity" type="text" required placeholder="Dallas" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                </div>
+                <div>
+                  <label for="subState" class="block text-xs font-semibold text-ink mb-1.5">State</label>
+                  <input id="subState" type="text" required placeholder="TX" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                </div>
+                <div>
+                  <label for="subZip" class="block text-xs font-semibold text-ink mb-1.5">ZIP Code</label>
+                  <input id="subZip" type="text" required placeholder="75201" class="w-full px-3.5 py-2.5 rounded-xl border border-borderWarm text-sm text-ink" />
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-4 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors shadow-sm">
+              Complete Order
+            </button>
+          </form>
+
+          <!-- Right Column: Live Sticky Order Summary -->
+          <aside class="lg:col-span-5 lg:sticky lg:top-28 bg-white rounded-3xl border border-borderWarm p-6 sm:p-8">
+            <h2 class="font-sans text-base font-semibold text-ink mb-5">Order Summary</h2>
+
+            <!-- Selected Starting City Preview -->
+            <div class="flex items-center gap-4 p-3.5 rounded-2xl bg-sand border border-borderWarm mb-6">
+              <div class="w-16 h-16 rounded-xl overflow-hidden photo-box shrink-0">
+                <img id="summaryCityImg" src="" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+              </div>
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">First Box</p>
+                <p id="summaryCityName" class="text-sm font-semibold text-ink"></p>
+                <p id="summaryDietaryText" class="text-xs text-muted mt-0.5"></p>
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="space-y-3 text-sm pb-5 border-b border-borderWarm">
+              <div class="flex items-center justify-between">
+                <span id="summaryPlanLabel" class="text-muted"></span>
+                <span id="summaryPlanRate" class="font-medium text-ink"></span>
+              </div>
+              <div id="summarySavingsRow" class="flex items-center justify-between text-emerald-700">
+                <span>Plan Savings</span>
+                <span id="summarySavingsText" class="font-medium"></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-muted">U.S. Priority Shipping</span>
+                <span class="font-medium text-emerald-700">$0.00 (Free)</span>
+              </div>
+            </div>
+
+            <div class="pt-5 flex items-baseline justify-between">
+              <div>
+                <span class="block text-sm font-semibold text-ink">Total Due Today</span>
+                <span id="summaryBillingNote" class="block text-xs text-muted mt-0.5"></span>
+              </div>
+              <span id="summaryTotalPrice" class="font-editorial text-3xl font-medium text-ink"></span>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Order Confirmation State (Hidden until form submission) -->
+        <div id="orderConfirmationCard" class="hidden max-w-2xl mx-auto bg-white rounded-3xl border border-borderWarm p-8 sm:p-12 text-center">
+          <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p id="confirmOrderNum" class="text-xs font-semibold uppercase tracking-wider text-accent"></p>
+          <h2 class="text-3xl sm:text-4xl font-medium text-ink mt-2">Your first box is reserved!</h2>
+          <p id="confirmMessage" class="text-sm sm:text-base text-muted mt-4 leading-relaxed"></p>
+
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+            <button type="button" data-nav="home" class="px-6 py-3 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors">
+              Return Home
+            </button>
+            <button type="button" id="placeAnotherOrderBtn" class="px-6 py-3 rounded-xl text-sm font-semibold text-ink bg-sand hover:bg-[#E7DFD3] border border-borderWarm transition-colors">
+              Start Another Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PAGE 7: SOURCES & AI POLICY (#page-sources)
+    ======================================================= -->
+    <section id="page-sources" class="page-view" aria-label="Works Cited and AI Policy Page">
+      <div class="max-w-5xl mx-auto px-5 sm:px-8 py-12 lg:py-16">
+        <div class="mb-10">
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent">BPA 365 Competition Documentation</p>
+          <h1 class="text-4xl sm:text-5xl font-medium text-ink mt-2">Works Cited &amp; AI Policy</h1>
+          <p class="text-base text-muted mt-2">
+            Full bibliography for all photography, typography, and libraries, plus BPA Level 2 AI usage documentation.
+          </p>
+        </div>
+
+        <!-- BPA Level 2 AI Usage Table -->
+        <div class="bg-white rounded-3xl border border-borderWarm p-6 sm:p-9 mb-8">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="text-2xl font-medium text-ink">BPA Level 2 AI Usage &amp; Documentation</h2>
+            <span class="px-3 py-1 rounded-full bg-sand border border-borderWarm text-xs font-semibold text-ink">
+              AI Policy Level 2 — Permitted with Citation
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-borderWarm text-xs uppercase tracking-wider text-muted">
+                  <th class="py-3 pr-4">Area</th>
+                  <th class="py-3 pr-4">Tool Used</th>
+                  <th class="py-3">How It Was Used &amp; Human Verification</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-borderWarm text-muted">
+                <tr>
+                  <td class="py-4 pr-4 font-semibold text-ink">Code Scaffolding</td>
+                  <td class="py-4 pr-4">Google Gemini</td>
+                  <td class="py-4">Assisted with semantic HTML5 structure, Tailwind CSS responsive grids, and JavaScript state/navigation logic. Reviewed, debugged, and tested by the team.</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-semibold text-ink">Layout Iteration</td>
+                  <td class="py-4 pr-4">Team-Directed</td>
+                  <td class="py-4">Team directed the editorial warm off-white design system, multi-page tab architecture, custom SVG logo, and synced checkout summary.</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-semibold text-ink">Copy Editing</td>
+                  <td class="py-4 pr-4">Google Gemini + Team</td>
+                  <td class="py-4">Refined plain-English descriptions for city boxes, local makers, FAQs, and subscription pricing so copy reads naturally and concisely.</td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4 font-semibold text-ink">Photography</td>
+                  <td class="py-4 pr-4">Unsplash (Real Photos)</td>
+                  <td class="py-4">No AI-generated images were used. All photographs are real images sourced under the Unsplash License and cited below.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Works Cited / MLA-Style Bibliography -->
+        <div class="bg-white rounded-3xl border border-borderWarm p-6 sm:p-9 space-y-6">
+          <h2 class="text-2xl font-medium text-ink">Works Cited (MLA Format)</h2>
+
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-accent mb-3">Frameworks, Fonts &amp; Graphics</h3>
+            <ul class="space-y-2.5 text-sm text-muted list-disc pl-5">
+              <li>Tailwind Labs. <em>Tailwind CSS</em>. Version 3 (CDN), 2026, https://tailwindcss.com/.</li>
+              <li>Production Type. <em>Newsreader</em>. Google Fonts, https://fonts.google.com/specimen/Newsreader.</li>
+              <li>Andersson, Rasmus. <em>Inter</em>. Google Fonts, https://fonts.google.com/specimen/Inter.</li>
+              <li>Competition Team. <em>Marlowby Isometric Box 'M' Logo</em>. Original inline SVG graphic, 2026.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-accent mb-3">Photography (Unsplash License — Free Commercial &amp; Non-Commercial Use)</h3>
+            <ul class="space-y-2 text-xs sm:text-sm text-muted list-disc pl-5">
+              <li><em>Austin, Texas Skyline</em>. Unsplash, images.unsplash.com/photo-1531218150217-54595bc2b934.</li>
+              <li><em>Seattle, Washington Skyline</em>. Unsplash, images.unsplash.com/photo-1502175353174-a7a70e73b362.</li>
+              <li><em>New Orleans French Quarter</em>. Unsplash, images.unsplash.com/photo-1571893544028-06b07af6dade.</li>
+              <li><em>Portland, Oregon Waterfront &amp; Bridges</em>. Unsplash, images.unsplash.com/photo-1507608616759-54f48f0af0ee.</li>
+              <li><em>Savannah, Georgia Historic Oaks</em>. Unsplash, images.unsplash.com/photo-1568515387631-8b650bbcdb90.</li>
+              <li><em>Chicago, Illinois River &amp; Architecture</em>. Unsplash, images.unsplash.com/photo-1494522855154-9297ac14b55f.</li>
+              <li><em>Small-Batch Coffee &amp; Espresso</em>. Unsplash, images.unsplash.com/photo-1495474472287-4d71bcdd2085.</li>
+              <li><em>Roasted Coffee Beans</em>. Unsplash, images.unsplash.com/photo-1447933601403-0c6688de566e.</li>
+              <li><em>Handcrafted Ceramic Pottery</em>. Unsplash, images.unsplash.com/photo-1565193566173-7a0ee3dbe261.</li>
+              <li><em>Local Honey Jars</em>. Unsplash, images.unsplash.com/photo-1587049352846-4a222e784d38.</li>
+              <li><em>Small-Batch Spices &amp; Hot Sauce</em>. Unsplash, images.unsplash.com/photo-1588166524941-3bf61a9c41db.</li>
+              <li><em>Hand-Poured Beeswax &amp; Soy Candles</em>. Unsplash, images.unsplash.com/photo-1603006905003-be475563bc59.</li>
+              <li><em>Neighborhood Artisan Bakery</em>. Unsplash, images.unsplash.com/photo-1509440159596-0249088772ff.</li>
+              <li><em>Craft Chocolate &amp; Toffee Confections</em>. Unsplash, images.unsplash.com/photo-1511381939415-e44015466834.</li>
+              <li><em>Botanical Bar Soap &amp; Self-Care</em>. Unsplash, images.unsplash.com/photo-1600857062241-98e5dba7f214.</li>
+              <li><em>Loose-Leaf Tea &amp; Herbs</em>. Unsplash, images.unsplash.com/photo-1564890369478-c89ca6d9cde9.</li>
+              <li><em>Independent Shop Owner</em>. Unsplash, images.unsplash.com/photo-1556742049-0cfed4f6a45d.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+       4-COLUMN FOOTER (VISIBLE ACROSS ALL PAGES)
+  ========================================================= -->
+  <footer class="bg-sand border-t border-borderWarm mt-auto">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-14">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+        <!-- Column 1: Brand -->
+        <div>
+          <button type="button" data-nav="home" class="flex items-center gap-2.5 mb-4" aria-label="marlowby Home">
+            <svg class="w-7 h-7" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M20 3.5L35 12V28L20 36.5L5 28V12L20 3.5Z" fill="#FFF7F4" stroke="#D44D1A" stroke-width="2.4" stroke-linejoin="round" />
+              <path d="M11 26.5V14.5L20 20.5L29 14.5V26.5" stroke="#D44D1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M20 20.5V31" stroke="#D44D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.45" />
+            </svg>
+            <span class="font-sans font-bold text-lg tracking-tight text-ink">marlowby</span>
+          </button>
+          <p class="text-sm text-muted leading-relaxed">
+            Explore Your City, One Box at a Time. Supporting independent U.S. makers since day one.
+          </p>
+        </div>
+
+        <!-- Column 2: Explore -->
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-ink mb-4">Explore</h3>
+          <ul class="space-y-2.5 text-sm text-muted">
+            <li><button type="button" data-nav="home" class="hover:text-accent transition-colors">Home</button></li>
+            <li><button type="button" data-nav="cities" class="hover:text-accent transition-colors">City Boxes</button></li>
+            <li><button type="button" data-nav="makers" class="hover:text-accent transition-colors">Local Makers</button></li>
+            <li><button type="button" data-nav="plans" class="hover:text-accent transition-colors">Plans</button></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Company & BPA Docs -->
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-ink mb-4">Company</h3>
+          <ul class="space-y-2.5 text-sm text-muted">
+            <li><button type="button" data-nav="who-are-we" class="hover:text-accent transition-colors">Who Are We</button></li>
+            <li><button type="button" data-nav="subscribe" class="hover:text-accent transition-colors">Subscribe</button></li>
+            <li><button type="button" data-nav="sources" class="hover:text-accent transition-colors">Works Cited &amp; AI Policy</button></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Newsletter -->
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-ink mb-4">City Announcements</h3>
+          <p class="text-sm text-muted mb-3">Get an email when next month's city box is revealed.</p>
+          <form id="newsletterForm" class="flex gap-2">
+            <label for="newsletterEmail" class="sr-only">Email address</label>
+            <input id="newsletterEmail" type="email" required placeholder="you@example.com" class="w-full min-w-0 px-3.5 py-2.5 rounded-xl bg-white border border-borderWarm text-sm text-ink" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-ink hover:bg-accent transition-colors shrink-0">
+              Join
+            </button>
+          </form>
+          <p id="newsletterFeedback" class="hidden text-xs font-medium text-emerald-700 mt-2"></p>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-6 border-t border-borderWarm flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
+        <p>&copy; 2026 Marlowby Subscription Co. All rights reserved.</p>
+        <p>BPA 365 Website Design &amp; Development Team</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+       APPLICATION JAVASCRIPT
+  ========================================================= -->
+  <script>
+    /* ===========================================================
+       1. DATA: CITIES, MAKERS, PLANS, FAQS
+    =========================================================== */
+    const CITIES = [
+      {
+        id: 'austin',
+        name: 'Austin, TX',
+        regionLabel: 'South',
+        regions: ['South'],
+        edition: 'October Edition',
+        retailValue: '$82 Retail Value',
+        image: 'https://images.unsplash.com/photo-1531218150217-54595bc2b934?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'Pecan-roasted coffee, wildflower honey, roasted pepper sauce, and speckled Eastside ceramics.',
+        guideSummary: 'Includes our 16-page South Congress & East Austin neighborhood guide featuring morning taco stands, indie record shops, and Lady Bird Lake walking routes.',
+        items: [
+          {
+            name: 'Pecan Roast Whole Bean Coffee',
+            maker: 'Red River Roasters',
+            desc: 'Medium-roast single-origin beans roasted in small 15 lb batches in East Austin.',
+            img: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Hill Country Wildflower Honey',
+            maker: 'Barton Creek Apiary',
+            desc: 'Raw, unfiltered Texas spring honey harvested from family-tended hives.',
+            img: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Smoked Jalapeño Table Sauce',
+            maker: 'South Congress Pantry',
+            desc: 'Bright, fire-roasted pepper sauce made with local Texas produce and garlic.',
+            img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Speckled Clay Espresso Cup',
+            maker: 'Eastside Ceramic Co.',
+            desc: 'Wheel-thrown 6 oz stoneware tumbler finished in a warm sandstone glaze.',
+            img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Sweet Pecan Brittle Pack',
+            maker: 'Guadalupe Confectionery',
+            desc: 'Crisp brown-butter brittle loaded with roasted Central Texas pecans.',
+            img: 'https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      },
+      {
+        id: 'seattle',
+        name: 'Seattle, WA',
+        regionLabel: 'Pacific Northwest',
+        regions: ['Pacific Northwest', 'West'],
+        edition: 'November Edition',
+        retailValue: '$86 Retail Value',
+        image: 'https://images.unsplash.com/photo-1502175353174-a7a70e73b362?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'Ballard espresso blend, handmade stoneware mug, cedar soy candle, and sea salt dark chocolate.',
+        guideSummary: 'Includes our Ballard & Fremont neighborhood booklet covering rainy-day coffee counters, Pike Place stalls, and Puget Sound ferry day trips.',
+        items: [
+          {
+            name: 'Ballard Harbor Espresso Blend',
+            maker: 'Puget Micro Roasters',
+            desc: 'Rich dark roast with cocoa and toasted hazelnut notes built for rainy mornings.',
+            img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Matte Fog Ceramic Mug',
+            maker: 'Rainier Ceramic Studio',
+            desc: 'Hand-shaped 12 oz mug inspired by misty mornings over Elliott Bay.',
+            img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Sea Salt 70% Dark Chocolate',
+            maker: 'Elliott Bay Cacao',
+            desc: 'Bean-to-bar dark chocolate topped with flaky Pacific Northwest sea salt.',
+            img: 'https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Cedar & Rain Botanical Soap',
+            maker: 'Cascade Botanical Soap',
+            desc: 'Cold-process olive oil bar scented with Washington cedarwood and eucalyptus.',
+            img: 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Olympic Evergreen Soy Candle',
+            maker: 'Fremont Wax Works',
+            desc: 'Hand-poured 8 oz soy candle with crisp fir needle and moss notes.',
+            img: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      },
+      {
+        id: 'new-orleans',
+        name: 'New Orleans, LA',
+        regionLabel: 'South',
+        regions: ['South'],
+        edition: 'December Edition',
+        retailValue: '$79 Retail Value',
+        image: 'https://images.unsplash.com/photo-1571893544028-06b07af6dade?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'French Quarter chicory coffee, Creole spice rub, brown-butter pralines, and spiced vanilla candle.',
+        guideSummary: 'Includes our Bywater & French Quarter pocket guide highlighting neighborhood brass bands, corner po-boy shops, and historic streetcar stops.',
+        items: [
+          {
+            name: 'Dark Roast Coffee & Chicory',
+            maker: 'Marigny Coffee Co.',
+            desc: 'Classic New Orleans blend roasted dark for café au lait at home.',
+            img: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Small-Batch Creole Spice Blend',
+            maker: 'Bayou Spice Co.',
+            desc: 'Smoked paprika, thyme, cayenne, and garlic ground fresh in the Ninth Ward.',
+            img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Brown-Butter Pecan Pralines',
+            maker: 'Royal Street Sweets',
+            desc: 'Melt-in-your-mouth creamy pralines cooked in copper kettles.',
+            img: 'https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Beignet & Sweet Dough Mix',
+            maker: 'Esplanade Bakery',
+            desc: 'Family-recipe French-style doughnut mix ready for weekend mornings.',
+            img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Vanilla Bean & Oak Candle',
+            maker: 'Crescent Apothecary',
+            desc: 'Warm, slow-burning candle inspired by live oaks along St. Charles Avenue.',
+            img: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      },
+      {
+        id: 'portland',
+        name: 'Portland, OR',
+        regionLabel: 'Pacific Northwest',
+        regions: ['Pacific Northwest', 'West'],
+        edition: 'January Edition',
+        retailValue: '$84 Retail Value',
+        image: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'Pure beeswax taper candles, Willamette herbal tea, sourdough crackers, and blackberry honey.',
+        guideSummary: 'Includes our Hawthorne & Division neighborhood guide featuring food-cart pods, indie bookstores, and Forest Park trailheads.',
+        items: [
+          {
+            name: 'Hand-Dipped Beeswax Candles',
+            maker: 'Hawthorne Beeswax',
+            desc: 'Naturally honey-scented 100% Oregon beeswax candles poured in small batches.',
+            img: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Willamette Mint & Chamomile Tea',
+            maker: 'Rose City Tea House',
+            desc: 'Organic loose-leaf herbal blend grown on family farms in the Willamette Valley.',
+            img: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Rosemary Sourdough Crisps',
+            maker: 'Burnside Hearth Bakery',
+            desc: 'Thin, crisp naturally leavened crackers baked with sea salt and fresh rosemary.',
+            img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Blackberry Blossom Honey',
+            maker: 'Hood River Hives',
+            desc: 'Light, floral Pacific Northwest honey perfect for tea or warm toast.',
+            img: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Oatmeal & Lavender Bar Soap',
+            maker: 'Alberta Skin Co.',
+            desc: 'Gentle exfoliating bar made with colloidal oats and Oregon lavender oil.',
+            img: 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      },
+      {
+        id: 'savannah',
+        name: 'Savannah, GA',
+        regionLabel: 'South',
+        regions: ['South'],
+        edition: 'February Edition',
+        retailValue: '$78 Retail Value',
+        image: 'https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'Tupelo coastal honey, peach-ginger black tea, cheese straws, and jasmine botanical soap.',
+        guideSummary: 'Includes our Historic District & Starland neighborhood booklet mapping quiet mossy squares, corner bakeries, and local art galleries.',
+        items: [
+          {
+            name: 'Lowcountry Tupelo Honey',
+            maker: 'Lowcountry Honey Farm',
+            desc: 'Silky, slow-crystallizing Southern honey bottled straight from coastal hives.',
+            img: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Georgia Peach Black Tea',
+            maker: 'Forsyth Tea Merchants',
+            desc: 'Aromatic loose-leaf black tea blended with dried orchard peaches for iced or hot brewing.',
+            img: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Sharp Cheddar Cheese Straws',
+            maker: 'Starland Bakehouse',
+            desc: 'Crisp, buttery Southern cheese straws with a light pinch of cayenne.',
+            img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Night Jasmine Botanical Soap',
+            maker: 'Oglethorpe Bath Co.',
+            desc: 'Shea-butter soap bar inspired by Savannah courtyard gardens in bloom.',
+            img: 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Spiced Peach Table Preserve',
+            maker: 'River Street Provisions',
+            desc: 'Small-kettle fruit preserve made with ripe Georgia peaches and warm cinnamon.',
+            img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      },
+      {
+        id: 'chicago',
+        name: 'Chicago, IL',
+        regionLabel: 'Midwest',
+        regions: ['Midwest'],
+        edition: 'March Edition',
+        retailValue: '$81 Retail Value',
+        image: 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?auto=format&fit=crop&w=1000&q=80',
+        shortBlurb: 'Butter almond toffee, winter espresso roast, hot giardiniera relish, and matte ceramic mug.',
+        guideSummary: 'Includes our Logan Square & West Loop neighborhood guide covering architecture river walks, cozy bakeries, and blues clubs.',
+        items: [
+          {
+            name: 'English Butter Almond Toffee',
+            maker: 'Lakefront Toffee Co.',
+            desc: 'Hand-pulled butter toffee coated in dark chocolate and roasted crushed almonds.',
+            img: 'https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'West Loop Winter Roast Coffee',
+            maker: 'Dearborn Coffee Roasters',
+            desc: 'Full-bodied medium-dark roast with caramel and toasted walnut notes.',
+            img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Hot Pepper Giardiniera Relish',
+            maker: 'Pilsen Pantry Co.',
+            desc: 'Classic Chicago-style pickled peppers, celery, and olives packed in herbs.',
+            img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Slate Stoneware Coffee Mug',
+            maker: 'Logan Square Clay',
+            desc: 'Heavyweight 12 oz handmade mug built to keep morning coffee hot.',
+            img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=600&q=80'
+          },
+          {
+            name: 'Maple Oat Shortbread Cookies',
+            maker: 'Lincoln Park Bakery',
+            desc: 'Crisp Midwest butter shortbread sweetened with Great Lakes maple syrup.',
+            img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80'
+          }
+        ]
+      }
+    ];
+
+    const MAKERS = [
+      {
+        name: 'Red River Roasters',
+        city: 'Austin, TX',
+        category: 'Coffee & Pantry',
+        founder: 'Founded by Elena & Sam Morales',
+        product: 'Pecan Roast Whole Bean Coffee',
+        story: 'Roasting 15-pound micro-batches in a converted East Austin garage since 2018.',
+        image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Rainier Ceramic Studio',
+        city: 'Seattle, WA',
+        category: 'Home & Goods',
+        founder: 'Founded by Hannah Park',
+        product: 'Matte Fog Stoneware Mug',
+        story: 'A four-person pottery studio in Ballard throwing everyday mugs from Pacific Northwest clay.',
+        image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Bayou Spice Co.',
+        city: 'New Orleans, LA',
+        category: 'Coffee & Pantry',
+        founder: 'Founded by Marcus Broussard',
+        product: 'Small-Batch Creole Spice Blend',
+        story: 'Third-generation family spice recipes freshly ground and jarred in New Orleans.',
+        image: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Hawthorne Beeswax',
+        city: 'Portland, OR',
+        category: 'Home & Goods',
+        founder: 'Founded by Claire Bennett',
+        product: 'Hand-Dipped Oregon Beeswax Candles',
+        story: 'Partners directly with Willamette Valley beekeepers to pour clean-burning beeswax candles.',
+        image: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Lowcountry Honey Farm',
+        city: 'Savannah, GA',
+        category: 'Coffee & Pantry',
+        founder: 'Founded by David & Ruth Holloway',
+        product: 'Raw Tupelo Coastal Honey',
+        story: 'Family-run coastal apiary producing single-harvest honey without heat pasteurization.',
+        image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Lakefront Toffee Co.',
+        city: 'Chicago, IL',
+        category: 'Sweets & Snacks',
+        founder: 'Founded by Nina Kowalski',
+        product: 'English Butter Almond Toffee',
+        story: 'Cooked in copper kettles every morning using Wisconsin creamery butter and dark chocolate.',
+        image: 'https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Burnside Hearth Bakery',
+        city: 'Portland, OR',
+        category: 'Sweets & Snacks',
+        founder: 'Founded by Owen & Tess Miller',
+        product: 'Rosemary Sourdough Crisps',
+        story: 'Neighborhood bread bakery turning heritage Pacific Northwest wheat into crisp crackers.',
+        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=700&q=80'
+      },
+      {
+        name: 'Cascade Botanical Soap',
+        city: 'Seattle, WA',
+        category: 'Self-Care',
+        founder: 'Founded by Maya Lin',
+        product: 'Cedar & Rain Cold-Process Bar',
+        story: 'Small-batch plant-oil soaps cured for six weeks and wrapped in recycled paper.',
+        image: 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&w=700&q=80'
+      }
+    ];
+
+    const PLANS = [
+      {
+        id: 'monthly',
+        name: 'Monthly',
+        pricePerBox: 49,
+        totalPrice: 49,
+        months: 1,
+        savingsText: '',
+        badge: null,
+        highlight: false,
+        subBilling: 'Billed monthly, cancel anytime',
+        giftBilling: 'One-time $49 gift (1 box)',
+        perks: ['1 U.S. city box every month', '5–6 full-size local products', 'Free U.S. shipping']
+      },
+      {
+        id: '3-month',
+        name: '3-Month',
+        pricePerBox: 45,
+        totalPrice: 135,
+        months: 3,
+        savingsText: 'Save 8% ($12)',
+        badge: null,
+        highlight: false,
+        subBilling: '$135 billed every 3 months',
+        giftBilling: 'One-time $135 gift (3 boxes)',
+        perks: ['3 consecutive city boxes', 'Choose your starting city', 'Free U.S. shipping']
+      },
+      {
+        id: '6-month',
+        name: '6-Month',
+        pricePerBox: 42,
+        totalPrice: 252,
+        months: 6,
+        savingsText: 'Save 14% ($42)',
+        badge: 'Most Popular',
+        highlight: true,
+        subBilling: '$252 billed every 6 months',
+        giftBilling: 'One-time $252 gift (6 boxes)',
+        perks: ['6 consecutive city boxes', 'Choose your starting city', 'Priority monthly dispatch']
+      },
+      {
+        id: '12-month',
+        name: '12-Month',
+        pricePerBox: 39,
+        totalPrice: 468,
+        months: 12,
+        savingsText: 'Save 20% ($120)',
+        badge: 'Best Value',
+        highlight: false,
+        subBilling: '$468 billed annually',
+        giftBilling: 'One-time $468 gift (12 boxes)',
+        perks: ['12 different U.S. cities', 'Choose your starting city', 'Lowest price per box']
+      }
+    ];
+
+    const FAQS = [
+      {
+        q: 'When do monthly boxes ship?',
+        a: 'Every box ships on the 15th of the month via tracked USPS Priority Mail. If you order before the 12th, your chosen starting city ships that same month.'
+      },
+      {
+        q: 'Can you accommodate dietary preferences?',
+        a: 'Yes. During sign-up you can select Standard, Vegetarian, or Nut-Free. We swap any conflicting food item for an equal-value local product from that same city.'
+      },
+      {
+        q: 'How do I skip a month or pause?',
+        a: 'Log into your account anytime before the 10th of the month and click "Skip Next Box." You will not be charged for skipped months.'
+      },
+      {
+        q: 'Do gift subscriptions auto-renew?',
+        a: 'No. Gift orders are a one-time payment and automatically stop after the final box is delivered. You can also include a handwritten note card.'
+      },
+      {
+        q: 'How easy is it to cancel?',
+        a: 'You can cancel online in two clicks with zero cancellation fees. Pre-paid multi-month plans simply finish delivering your remaining boxes and will not renew.'
+      }
+    ];
+
+    /* ===========================================================
+       2. APPLICATION STATE
+    =========================================================== */
+    const state = {
+      currentPage: 'home',
+      selectedCityId: 'austin',
+      cityRegionFilter: 'All Cities',
+      citySearchQuery: '',
+      makerCategoryFilter: 'All',
+      selectedPlanId: '6-month',
+      isGift: false,
+      dietary: 'Standard'
+    };
+
+    /* ===========================================================
+       3. ROCK-SOLID MULTI-PAGE NAVIGATION (NO HASH / NO HISTORY)
+    =========================================================== */
+    const VALID_PAGES = ['home', 'cities', 'makers', 'plans', 'who-are-we', 'subscribe', 'sources'];
+
+    function navigateTo(pageId) {
+      const target = VALID_PAGES.includes(pageId) ? pageId : 'home';
+      state.currentPage = target;
+
+      // Hide all pages, show only target page
+      const allPages = document.querySelectorAll('.page-view');
+      for (let i = 0; i < allPages.length; i++) {
+        allPages[i].classList.remove('active');
+      }
+      const activePage = document.getElementById('page-' + target);
+      if (activePage) {
+        activePage.classList.add('active');
+      }
+
+      // Update Desktop Nav Active Pill Styling
+      const navTabs = document.querySelectorAll('.nav-tab');
+      for (let i = 0; i < navTabs.length; i++) {
+        const btn = navTabs[i];
+        const isActive = btn.getAttribute('data-nav') === target;
+        if (isActive) {
+          btn.className = 'nav-tab px-4 py-2 rounded-xl text-sm font-semibold bg-sand text-ink transition-colors';
+        } else {
+          btn.className = 'nav-tab px-4 py-2 rounded-xl text-sm font-medium text-muted hover:text-ink hover:bg-sand/60 transition-colors';
+        }
+      }
+
+      // Update Mobile Nav Active Styling
+      const mobileTabs = document.querySelectorAll('.mobile-nav-tab');
+      for (let i = 0; i < mobileTabs.length; i++) {
+        const btn = mobileTabs[i];
+        const isActive = btn.getAttribute('data-nav') === target;
+        if (isActive) {
+          btn.className = 'mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-sand text-ink transition-colors';
+        } else {
+          btn.className = 'mobile-nav-tab w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-muted hover:bg-sand/60 transition-colors';
+        }
+      }
+
+      // Close mobile drawer if open
+      closeMobileMenu();
+
+      // Sync checkout page whenever user visits Subscribe
+      if (target === 'subscribe') {
+        syncCheckoutUI();
+      }
+
+      // Scroll cleanly to top (no SecurityError in iframes)
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    // Global Click Delegation for ALL [data-nav] buttons across every page
+    document.addEventListener('click', function (e) {
+      const navBtn = e.target.closest('[data-nav]');
+      if (navBtn) {
+        e.preventDefault();
+        const destination = navBtn.getAttribute('data-nav');
+        navigateTo(destination);
+      }
+    });
+
+    /* ===========================================================
+       4. MOBILE HAMBURGER MENU
+    =========================================================== */
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const menuIconOpen = document.getElementById('menuIconOpen');
+    const menuIconClose = document.getElementById('menuIconClose');
+
+    function closeMobileMenu() {
+      mobileDrawer.classList.add('hidden');
+      menuIconOpen.classList.remove('hidden');
+      menuIconClose.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    mobileMenuBtn.addEventListener('click', function () {
+      const isClosed = mobileDrawer.classList.contains('hidden');
+      if (isClosed) {
+        mobileDrawer.classList.remove('hidden');
+        menuIconOpen.classList.add('hidden');
+        menuIconClose.classList.remove('hidden');
+        mobileMenuBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        closeMobileMenu();
+      }
+    });
+
+    /* ===========================================================
+       5. HOME PAGE PREVIEW RENDERERS
+    =========================================================== */
+    function renderHomePreviews() {
+      // 3 Featured Cities (Austin, Seattle, New Orleans)
+      const citiesContainer = document.getElementById('homeFeaturedCities');
+      citiesContainer.innerHTML = CITIES.slice(0, 3).map(function (city) {
+        return `
+          <div class="bg-white rounded-2xl border border-borderWarm overflow-hidden flex flex-col hover:border-ink/30 transition-colors">
+            <div class="h-52 photo-box overflow-hidden relative">
+              <img src="${city.image}" alt="${city.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+              <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/95 text-[11px] font-semibold text-ink">
+                ${city.regionLabel}
+              </span>
+            </div>
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <p class="text-xs font-medium text-muted">${city.edition} &middot; ${city.retailValue}</p>
+                <h3 class="text-xl font-semibold text-ink mt-1">${city.name}</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">${city.shortBlurb}</p>
+              </div>
+              <button type="button" onclick="openCityFromHome('${city.id}')" class="mt-5 w-full py-2.5 rounded-xl text-xs font-semibold text-ink bg-sand hover:bg-accent hover:text-white transition-colors">
+                See Inside ${city.name}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 3 Featured Makers
+      const makersContainer = document.getElementById('homeFeaturedMakers');
+      makersContainer.innerHTML = MAKERS.slice(0, 3).map(function (maker) {
+        return `
+          <div class="bg-white rounded-2xl border border-borderWarm overflow-hidden flex flex-col">
+            <div class="h-48 photo-box overflow-hidden">
+              <img src="${maker.image}" alt="${maker.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+            </div>
+            <div class="p-6">
+              <p class="text-xs font-semibold text-accent">${maker.city}</p>
+              <h3 class="text-lg font-semibold text-ink mt-1">${maker.name}</h3>
+              <p class="text-sm text-muted mt-2 leading-relaxed">${maker.story}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openCityFromHome(cityId) {
+      state.selectedCityId = cityId;
+      state.cityRegionFilter = 'All Cities';
+      state.citySearchQuery = '';
+      document.getElementById('citySearchInput').value = '';
+      renderCityRegionPills();
+      renderCitiesGrid();
+      renderCityDetailPanel();
+      navigateTo('cities');
+
+      // Smoothly bring the Inside the Box showcase into view after switching page
+      setTimeout(function () {
+        const panel = document.getElementById('cityDetailPanel');
+        if (panel) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 80);
+    }
+
+    /* ===========================================================
+       6. CITY BOXES PAGE: FILTERS, GRID & INSIDE-THE-BOX PANEL
+    =========================================================== */
+    function renderCityRegionPills() {
+      const pills = document.querySelectorAll('.region-pill');
+      for (let i = 0; i < pills.length; i++) {
+        const btn = pills[i];
+        const isActive = btn.getAttribute('data-region') === state.cityRegionFilter;
+        btn.className = isActive
+          ? 'region-pill px-4 py-2 rounded-xl text-xs font-semibold bg-ink text-white transition-colors'
+          : 'region-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-borderWarm text-muted hover:text-ink hover:bg-sand transition-colors';
+      }
+    }
+
+    function renderCitiesGrid() {
+      const grid = document.getElementById('citiesGrid');
+      const empty = document.getElementById('citiesEmptyState');
+      const q = state.citySearchQuery.trim().toLowerCase();
+
+      const filtered = CITIES.filter(function (c) {
+        const regionMatch =
+          state.cityRegionFilter === 'All Cities' ||
+          c.regions.indexOf(state.cityRegionFilter) !== -1;
+
+        const searchMatch =
+          !q ||
+          c.name.toLowerCase().indexOf(q) !== -1 ||
+          c.shortBlurb.toLowerCase().indexOf(q) !== -1 ||
+          c.items.some(function (item) {
+            return (
+              item.name.toLowerCase().indexOf(q) !== -1 ||
+              item.maker.toLowerCase().indexOf(q) !== -1
+            );
+          });
+
+        return regionMatch && searchMatch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      grid.innerHTML = filtered.map(function (c) {
+        const isSelected = c.id === state.selectedCityId;
+        return `
+          <div class="bg-white rounded-2xl border ${isSelected ? 'border-accent ring-2 ring-accent/20' : 'border-borderWarm'} overflow-hidden flex flex-col transition-all">
+            <div class="h-48 photo-box overflow-hidden relative">
+              <img src="${c.image}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 text-[11px] font-semibold text-ink">
+                ${c.regionLabel}
+              </span>
+              ${isSelected ? '<span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-[11px] font-semibold text-white">Viewing</span>' : ''}
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <p class="text-xs text-muted">${c.edition} &middot; ${c.retailValue}</p>
+                <h2 class="font-sans text-lg font-semibold text-ink mt-0.5">${c.name}</h2>
+                <p class="text-sm text-muted mt-1.5 leading-relaxed">${c.shortBlurb}</p>
+              </div>
+              <button type="button" onclick="selectCityDetail('${c.id}')" class="mt-4 w-full py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                isSelected
+                  ? 'bg-accent text-white'
+                  : 'bg-sand text-ink hover:bg-ink hover:text-white'
+              }">
+                ${isSelected ? 'Showing Items Below' : 'Inspect Inside the Box'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCityDetailPanel() {
+      const city = CITIES.find(function (c) { return c.id === state.selectedCityId; }) || CITIES[0];
+      const panel = document.getElementById('cityDetailPanel');
+
+      const itemsHtml = city.items.map(function (item) {
+        return `
+          <div class="bg-cream rounded-2xl border border-borderWarm overflow-hidden flex flex-col">
+            <div class="h-36 photo-box overflow-hidden">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+            </div>
+            <div class="p-4 flex-1">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">${item.maker}</p>
+              <h4 class="text-sm font-semibold text-ink mt-1">${item.name}</h4>
+              <p class="text-xs text-muted mt-1.5 leading-relaxed">${item.desc}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      panel.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-12">
+          <div class="lg:col-span-5 photo-box min-h-[260px]">
+            <img src="${city.image}" alt="${city.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+          </div>
+          <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5 mb-3">
+                <span class="px-3 py-1 rounded-full bg-sand text-xs font-semibold text-ink">${city.edition}</span>
+                <span class="px-3 py-1 rounded-full bg-emerald-50 text-xs font-semibold text-emerald-800">${city.retailValue}</span>
+              </div>
+              <h2 class="text-3xl sm:text-4xl font-medium text-ink">Inside the ${city.name} Box</h2>
+              <p class="text-sm sm:text-base text-muted mt-3 leading-relaxed">${city.guideSummary}</p>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-borderWarm flex flex-wrap items-center justify-between gap-4">
+              <span class="text-xs font-medium text-muted">5 full-size local items + printed neighborhood guide</span>
+              <button type="button" onclick="startWithCity('${city.id}')" class="px-6 py-3 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accentHover transition-colors">
+                Start My Subscription with ${city.name}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-10 border-t border-borderWarm bg-white">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted mb-5">5 Full-Size Local Items Included</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function selectCityDetail(cityId) {
+      state.selectedCityId = cityId;
+      renderCitiesGrid();
+      renderCityDetailPanel();
+      const panel = document.getElementById('cityDetailPanel');
+      if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function startWithCity(cityId) {
+      state.selectedCityId = cityId;
+      navigateTo('subscribe');
+    }
+
+    document.getElementById('cityRegionFilters').addEventListener('click', function (e) {
+      const btn = e.target.closest('.region-pill');
+      if (!btn) return;
+      state.cityRegionFilter = btn.getAttribute('data-region');
+      renderCityRegionPills();
+      renderCitiesGrid();
+    });
+
+    document.getElementById('citySearchInput').addEventListener('input', function (e) {
+      state.citySearchQuery = e.target.value;
+      renderCitiesGrid();
+    });
+
+    /* ===========================================================
+       7. LOCAL MAKERS PAGE: CATEGORY FILTER & NOMINATION FORM
+    =========================================================== */
+    function renderMakerPills() {
+      const pills = document.querySelectorAll('.maker-pill');
+      for (let i = 0; i < pills.length; i++) {
+        const btn = pills[i];
+        const isActive = btn.getAttribute('data-maker-cat') === state.makerCategoryFilter;
+        btn.className = isActive
+          ? 'maker-pill px-4 py-2 rounded-xl text-xs font-semibold bg-ink text-white transition-colors'
+          : 'maker-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-borderWarm text-muted hover:text-ink hover:bg-sand transition-colors';
+      }
+    }
+
+    function renderMakersGrid() {
+      const grid = document.getElementById('makersGrid');
+      const list = state.makerCategoryFilter === 'All'
+        ? MAKERS
+        : MAKERS.filter(function (m) { return m.category === state.makerCategoryFilter; });
+
+      grid.innerHTML = list.map(function (m) {
+        return `
+          <article class="bg-white rounded-2xl border border-borderWarm overflow-hidden flex flex-col">
+            <div class="h-48 photo-box overflow-hidden relative">
+              <img src="${m.image}" alt="${m.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 text-[11px] font-semibold text-ink">
+                ${m.city}
+              </span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">${m.category}</p>
+                <h2 class="font-sans text-lg font-semibold text-ink mt-1">${m.name}</h2>
+                <p class="text-xs font-medium text-muted mt-0.5">${m.founder}</p>
+                <p class="text-sm text-muted mt-2.5 leading-relaxed">${m.story}</p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-borderWarm">
+                <p class="text-[11px] uppercase tracking-wider text-muted">Featured Product</p>
+                <p class="text-xs font-semibold text-ink mt-0.5">${m.product}</p>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('makerCategoryFilters').addEventListener('click', function (e) {
+      const btn = e.target.closest('.maker-pill');
+      if (!btn) return;
+      state.makerCategoryFilter = btn.getAttribute('data-maker-cat');
+      renderMakerPills();
+      renderMakersGrid();
+    });
+
+    document.getElementById('nominateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const shop = document.getElementById('nomShop').value.trim();
+      const city = document.getElementById('nomCity').value.trim();
+      const feedback = document.getElementById('nomFeedback');
+      feedback.textContent = 'Thanks! We added ' + shop + ' (' + city + ') to our sourcing list.';
+      feedback.classList.remove('hidden');
+      e.target.reset();
+    });
+
+    /* ===========================================================
+       8. PLANS PAGE: SELF/GIFT TOGGLE, CARDS & FAQ ACCORDION
+    =========================================================== */
+    function renderPlansToggle() {
+      const selfBtn = document.getElementById('plansModeSelf');
+      const giftBtn = document.getElementById('plansModeGift');
+      const note = document.getElementById('plansGiftNote');
+
+      if (!state.isGift) {
+        selfBtn.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-white text-ink shadow-sm transition-colors';
+        giftBtn.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold text-muted hover:text-ink transition-colors';
+        note.classList.add('hidden');
+      } else {
+        selfBtn.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold text-muted hover:text-ink transition-colors';
+        giftBtn.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-white text-ink shadow-sm transition-colors';
+        note.classList.remove('hidden');
+      }
+      renderPlansGrid();
+    }
+
+    function renderPlansGrid() {
+      const grid = document.getElementById('plansGrid');
+      grid.innerHTML = PLANS.map(function (p) {
+        const billing = state.isGift ? p.giftBilling : p.subBilling;
+        const ctaText = state.isGift ? 'Gift ' + p.name : 'Choose Plan';
+        return `
+          <div class="bg-white rounded-3xl border ${p.highlight ? 'border-accent ring-2 ring-accent/20' : 'border-borderWarm'} p-6 sm:p-7 flex flex-col justify-between relative">
+            ${p.badge ? `<span class="absolute -top-3 left-6 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-semibold">${p.badge}</span>` : ''}
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="font-sans text-xl font-semibold text-ink">${p.name}</h2>
+                ${p.savingsText ? `<span class="text-xs font-semibold text-emerald-700">${p.savingsText.split(' ')[0]} ${p.savingsText.split(' ')[1]}</span>` : ''}
+              </div>
+              <div class="mt-4 flex items-baseline gap-1">
+                <span class="font-editorial text-4xl font-medium text-ink">$${p.pricePerBox}</span>
+                <span class="text-xs text-muted">/ box</span>
+              </div>
+              <p class="text-xs text-muted mt-1.5">${billing}</p>
+
+              <ul class="mt-6 space-y-2.5 text-sm text-muted">
+                ${p.perks.map(function (perk) {
+                  return `
+                    <li class="flex items-start gap-2.5">
+                      <svg class="w-4 h-4 text-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>${perk}</span>
+                    </li>
+                  `;
+                }).join('')}
+              </ul>
+            </div>
+
+            <button type="button" onclick="choosePlanAndCheckout('${p.id}')" class="mt-8 w-full py-3 rounded-xl text-sm font-semibold transition-colors ${
+              p.highlight
+                ? 'bg-accent hover:bg-accentHover text-white'
+                : 'bg-sand hover:bg-ink hover:text-white text-ink'
+            }">
+              ${ctaText}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function choosePlanAndCheckout(planId) {
+      state.selectedPlanId = planId;
+      navigateTo('subscribe');
+    }
+
+    document.getElementById('plansModeSelf').addEventListener('click', function () {
+      state.isGift = false;
+      renderPlansToggle();
+    });
+
+    document.getElementById('plansModeGift').addEventListener('click', function () {
+      state.isGift = true;
+      renderPlansToggle();
+    });
+
+    function renderFaqs() {
+      const container = document.getElementById('faqAccordion');
+      container.innerHTML = FAQS.map(function (faq, idx) {
+        return `
+          <div class="bg-white rounded-2xl border border-borderWarm overflow-hidden">
+            <button type="button" onclick="toggleFaq(${idx})" id="faqBtn-${idx}" aria-expanded="false" class="w-full px-6 py-4 text-left flex items-center justify-between gap-4 text-sm sm:text-base font-semibold text-ink hover:text-accent transition-colors">
+              <span>${faq.q}</span>
+              <svg id="faqIcon-${idx}" class="w-4 h-4 text-muted shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="faqPanel-${idx}" class="hidden px-6 pb-5 text-sm text-muted leading-relaxed">
+              ${faq.a}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleFaq(idx) {
+      const panel = document.getElementById('faqPanel-' + idx);
+      const icon = document.getElementById('faqIcon-' + idx);
+      const btn = document.getElementById('faqBtn-' + idx);
+      const isHidden = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden');
+      icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      btn.setAttribute('aria-expanded', String(isHidden));
+    }
+
+    /* ===========================================================
+       9. SUBSCRIBE PAGE: SYNCED FORM & LIVE ORDER SUMMARY
+    =========================================================== */
+    function populateCheckoutCityOptions() {
+      const select = document.getElementById('checkoutCitySelect');
+      select.innerHTML = CITIES.map(function (c) {
+        return `<option value="${c.id}">${c.name} (${c.edition})</option>`;
+      }).join('');
+    }
+
+    function renderCheckoutPlanSelector() {
+      const container = document.getElementById('checkoutPlanSelector');
+      container.innerHTML = PLANS.map(function (p) {
+        const isSelected = p.id === state.selectedPlanId;
+        return `
+          <button type="button" onclick="selectCheckoutPlan('${p.id}')" class="p-3 rounded-xl border text-left transition-all ${
+            isSelected
+              ? 'border-accent bg-[#FFF7F4] ring-1 ring-accent'
+              : 'border-borderWarm bg-white hover:bg-sand'
+          }">
+            <span class="block text-xs font-semibold text-ink">${p.name}</span>
+            <span class="block text-sm font-bold text-accent mt-0.5">$${p.pricePerBox}/box</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCheckoutPlan(planId) {
+      state.selectedPlanId = planId;
+      syncCheckoutUI();
+    }
+
+    function syncCheckoutUI() {
+      // Ensure checkout form is visible if returning from a previous order
+      document.getElementById('checkoutContainer').classList.remove('hidden');
+      document.getElementById('orderConfirmationCard').classList.add('hidden');
+
+      renderCheckoutPlanSelector();
+
+      // Sync Gift Toggle & Fields
+      const giftCheckbox = document.getElementById('checkoutGiftToggle');
+      const giftFields = document.getElementById('checkoutGiftFields');
+      giftCheckbox.checked = state.isGift;
+      if (state.isGift) {
+        giftFields.classList.remove('hidden');
+      } else {
+        giftFields.classList.add('hidden');
+      }
+
+      // Sync Starting City & Dietary Dropdowns
+      document.getElementById('checkoutCitySelect').value = state.selectedCityId;
+      document.getElementById('checkoutDietary').value = state.dietary;
+
+      // Update Live Sticky Order Summary
+      const plan = PLANS.find(function (p) { return p.id === state.selectedPlanId; }) || PLANS[2];
+      const city = CITIES.find(function (c) { return c.id === state.selectedCityId; }) || CITIES[0];
+
+      const img = document.getElementById('summaryCityImg');
+      img.src = city.image;
+      img.alt = city.name;
+      img.style.display = 'block';
+
+      document.getElementById('summaryCityName').textContent = city.name + ' Box';
+      document.getElementById('summaryDietaryText').textContent = 'Preference: ' + state.dietary;
+      document.getElementById('summaryPlanLabel').textContent = plan.name + (state.isGift ? ' Gift' : ' Plan');
+      document.getElementById('summaryPlanRate').textContent = '$' + plan.pricePerBox + '/box × ' + plan.months;
+
+      const savingsRow = document.getElementById('summarySavingsRow');
+      if (plan.savingsText) {
+        savingsRow.classList.remove('hidden');
+        document.getElementById('summarySavingsText').textContent = plan.savingsText;
+      } else {
+        savingsRow.classList.add('hidden');
+      }
+
+      document.getElementById('summaryTotalPrice').textContent = '$' + plan.totalPrice;
+      document.getElementById('summaryBillingNote').textContent = state.isGift ? plan.giftBilling : plan.subBilling;
+    }
+
+    document.getElementById('checkoutGiftToggle').addEventListener('change', function (e) {
+      state.isGift = e.target.checked;
+      renderPlansToggle();
+      syncCheckoutUI();
+    });
+
+    document.getElementById('checkoutCitySelect').addEventListener('change', function (e) {
+      state.selectedCityId = e.target.value;
+      syncCheckoutUI();
+    });
+
+    document.getElementById('checkoutDietary').addEventListener('change', function (e) {
+      state.dietary = e.target.value;
+      syncCheckoutUI();
+    });
+
+    document.getElementById('subscribeForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('subName').value.trim();
+      const email = document.getElementById('subEmail').value.trim();
+      const cityObj = CITIES.find(function (c) { return c.id === state.selectedCityId; }) || CITIES[0];
+      const planObj = PLANS.find(function (p) { return p.id === state.selectedPlanId; }) || PLANS[2];
+      const orderNum = 'MB-' + Math.floor(100000 + Math.random() * 900000);
+
+      document.getElementById('confirmOrderNum').textContent = 'Order ' + orderNum + ' Confirmed';
+      document.getElementById('confirmMessage').textContent =
+        'Thank you, ' + name + '! Your ' + planObj.name + (state.isGift ? ' Gift' : ' Subscription') +
+        ' starting with the ' + cityObj.name + ' Box (' + state.dietary + ') is confirmed. ' +
+        'A receipt and shipping timeline have been sent to ' + email + '.';
+
+      document.getElementById('checkoutContainer').classList.add('hidden');
+      document.getElementById('orderConfirmationCard').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('placeAnotherOrderBtn').addEventListener('click', function () {
+      document.getElementById('subscribeForm').reset();
+      syncCheckoutUI();
+    });
+
+    /* ===========================================================
+       10. FOOTER NEWSLETTER FORM
+    =========================================================== */
+    document.getElementById('newsletterForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const feedback = document.getElementById('newsletterFeedback');
+      feedback.textContent = "You're on the list for next month's city reveal.";
+      feedback.classList.remove('hidden');
+      e.target.reset();
+    });
+
+    /* ===========================================================
+       11. INITIALIZE APPLICATION
+    =========================================================== */
+    document.addEventListener('DOMContentLoaded', function () {
+      renderHomePreviews();
+      renderCityRegionPills();
+      renderCitiesGrid();
+      renderCityDetailPanel();
+      renderMakerPills();
+      renderMakersGrid();
+      renderPlansToggle();
+      renderFaqs();
+      populateCheckoutCityOptions();
+      syncCheckoutUI();
+      navigateTo('home');
+    });
+  </script>
+</body>
+</html>
